@@ -96,19 +96,6 @@ die() {
     exit "${code}"
 }
 
-#die() {
-#    warn "$@"
-#    exit 1
-#}
-#
-#warn() {
-#    catecho "$@" >&2
-#}
-#
-#catecho() {
-#    [ -t 0 ] && echo "$@" || cat -
-#}
-
 parseOptions() {
     # default values of variables set from params
     flag=0
@@ -222,14 +209,6 @@ getDir() {
     fi
         echo "${result}"
 }
-
-#isNotSet() {
-#    local result=1
-#
-#    [[ -z "${@+"set"}" ]] && result=0
-#
-#    return "${result}"
-#}
 
 isProgExists() {
     local result=1
