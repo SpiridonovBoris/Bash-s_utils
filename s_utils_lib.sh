@@ -3,7 +3,7 @@
 # s_utils_lib.sh
 # 16.09.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 16.09.2024 15:18:15
+# Last Modified: 14.04.2025 13:15:47
 
 # Bash utils library
 # For only be evaluated a single time
@@ -12,31 +12,32 @@
 # Add library
 FILE="s_utils.sh"
 
-filePath="."
-if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-        PATH="${PATH}":"$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-    fi
-fi
-
-filePath=""${HOME}""
-if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-        PATH="${PATH}":"${filePath}"
+file_path=""${HOME}"/.local/lib/bash"
+if [[ -f ""${file_path}"/"${FILE}"" ]]; then
+    if [[ ":${PATH}:" != *":${file_path}:"* ]]; then
+        PATH="${file_path}":"${PATH}"
     fi
 fi
 
 filePath=""${HOME}"/Desktop"
 if [[ -f ""${filePath}"/"${FILE}"" ]]; then
     if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-        PATH="${PATH}":"${filePath}"
+        PATH="${filePath}":"${PATH}"
     fi
 fi
 
-filePath=""${HOME}"/Job/Ronavi/Projects/H1500/Prog"
+filePath=""${HOME}""
 if [[ -f ""${filePath}"/"${FILE}"" ]]; then
     if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-        PATH="${PATH}":"${filePath}"
+        PATH="${filePath}":"${PATH}"
+    fi
+fi
+
+filePath="."
+filePath="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+        PATH="${filePath}":"${PATH}"
     fi
 fi
 

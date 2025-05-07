@@ -3,43 +3,7 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 14.02.2025 18:21:58
-
-# Bash utils library
-# For only be evaluated a single time
-# Usage
-# Add library
-#FILE="s_utils.sh"
-#
-#filePath="."
-#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-#        PATH="${PATH}":"$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-#    fi
-#fi
-#
-#filePath=""${HOME}""
-#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-#        PATH="${PATH}":"${filePath}"
-#    fi
-#fi
-#
-#filePath=""${HOME}"/Desktop"
-#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-#        PATH="${PATH}":"${filePath}"
-#    fi
-#fi
-#
-#filePath=""${HOME}"/Job/Ronavi/Projects/H1500/Prog"
-#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
-#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
-#        PATH="${PATH}":"${filePath}"
-#    fi
-#fi
-#
-#source "${FILE}" || (echo >&2 -e ""${FILE}" not finde in the \$PATH." && exit 1)
+# Last Modified: 21.04.2025 22:17:09
 
 printPelp() {
     cat <<EOF
@@ -57,33 +21,27 @@ Available options:
 -f, --flag      Some flag description.
 -p, --param     Some param description,
                 param_value description.
--a              Вывести все объекты.
--c              Произвести подсчёт.
--d              Указать директорию.
--e              Развернуть объект.
--f              Указать файл, из которого нужно прочитать данные.
--h              Вывести справку по команде.
--i              Игнорировать регистр символов.
--l              Выполнить полноформатный вывод данных.
--n              Использовать неинтерактивный (пакетный) режим.
--o              Позволяет указать файл, в который нужно перенаправить вывод.
--q              Выполнить скрипт в quiet-режиме.
--r              Обрабатывать папки и файлы рекурсивно.
--s              Выполнить скрипт в silent-режиме.
--v              Выполнить многословный вывод.
--x              Исключить объект.
--y              Ответить «yes» на все вопросы.
---list-only     Вывести на экран вывод прогаммы как при выволнении, но не чего не делать на самом деле.
+-a              Output all objects.
+-c              Make a count.
+-d              Specify directory.
+-e              Expand object.
+-f              Specify the file from which to read data.
+-i              Ignore character case.
+-l              Make full-format data output.
+-n              Use non-interactive (batch) mode.
+-o              Specify a file to which to redirect output.
+-q              Execute a script in quiet mode.
+-r              Process folders and files recursively.
+-s              Execute a script in silent mode.
+-v              Execute verbose output.
+-x              Exclude an object.
+-y              Answer ‘yes’ to all questions.
+--list-only     Display the output of the progamma as if it were being executed, but not actually doing anything.
 
 Dependency:
 
 EOF
     exit 0
-}
-
-cleanup() {
-    trap - SIGINT SIGTERM ERR EXIT
-    # script cleanup here
 }
 
 init() {
@@ -97,6 +55,14 @@ init() {
 
     readonly DATE=$(date "+%Y/%m/%d_%H:%M:%S")
     readonly NEW_LINE="\n"
+
+    readonly RESPONSE_PIPE=""${HOME}"/response_pipe"
+}
+
+cleanup() {
+    trap - SIGINT SIGTERM ERR EXIT
+    # script cleanup here
+    rm -f "${RESPONSE_PIPE}"
 }
 
 setupColors() {
@@ -175,20 +141,34 @@ parseOptions() {
     return 0
 }
 
-asciiToHex() {
-    printf "%s" "${@}" | xxd -p -u
+decimalToHex() {
+    printf "%02x" "${@}"
 }
 
-hexToAscii() {
-    echo "${@}" | xxd -r -p
+asciiToHex() {
+    #printf "%s" "${@}" | xxd -u -p
+    printf "%x" "'${@}"
 }
 
 binaryToHex() {
     printf "%x" "$((2#"${@}"))"
 }
 
+hexToAscii() {
+    echo -n "${@}" | xxd -r -p
+}
+
 binaryToDecimal() {
-    echo "$((2#"${@}"))"
+    echo -n "$((2#"${@}"))"
+}
+
+hexToDecimal() {
+    #echo "$((0x"${@}"))"
+    printf "%d" 0x"${@}"
+}
+
+stringToInt () {
+    echo -n "$(("${@}"))"
 }
 
 confirm() {
@@ -204,6 +184,7 @@ confirm() {
     esac
 }
 
+# isFileExists /tmp/fileName.ext # Return 0
 isFileExists() {
     local filePath="${1:-""}"
 
@@ -214,6 +195,7 @@ isFileExists() {
     return "${result}"
 }
 
+# isDirExists /tmp # Return 0
 isDirExists() {
     local dirPath="${1:-""}"
 
@@ -259,13 +241,30 @@ getDir() {
         echo "${result}"
 }
 
-#isNotSet() {
-#    local result=1
-#
+# isNotSet: test var to unset any value
+# isNotSet $var # Return 1
+# var="Any_value"
+# isNotSet $var # Return 0
+isNotSet() {
+    local result=1
+
 #    [[ -z "${@+"set"}" ]] && result=0
-#
-#    return "${result}"
-#}
+    [[ -z "${@+set}" ]] && result=0
+
+    return "${result}"
+}
+
+# isSet: test var on set any value
+# isSet $var # Return 1
+# var="Any_value"
+# isSet $var # Return 0
+isSet() {
+    local result=1
+
+    [[ -z "${@+set}" ]] || result=0
+
+    return "${result}"
+}
 
 isProgExists() {
     local result=1
@@ -344,7 +343,7 @@ isRoot() {
     if [[ "$(id -u)" == 0 ]]; then
         result=0
     else
-        msg "This script NOT have root mode"
+        msg "This script NOT have root mode."
     fi
 
     echo "${result}"
@@ -377,7 +376,7 @@ bashCheck() {
     local version="${1:-4}"
 
     if [[ "$(isBashVersion "${version}")" != 0 ]]; then
-        die "Bash "${version}".0+ required"
+        die "Bash "${version}".0+ required."
     fi
 }
 
@@ -393,7 +392,7 @@ isLibrary() {
 
 libraryCheck() {
     (( "$(isLibrary)" == 0 )) || {
-    die ""${BASH_SOURCE[0]}" Only source this as libraries"
+    die ""${BASH_SOURCE[0]}" Only source this as libraries."
     }
 }
 
@@ -479,7 +478,7 @@ getArraySize() {
     return "${result}"
 }
 
-# forEach ls echo 
+# forEach ls echo
 forEach() {
     local each="${1:-1}"
     local comm="${2:-""}"
