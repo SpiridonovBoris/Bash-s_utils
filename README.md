@@ -18,33 +18,34 @@ source s_utils_lib.sh
 ```
 or
 ```bash
-FILE="s_utils_lib.sh"
+FILE="s_utils.sh"
 
-file_path="."
+file_path=""${HOME}"/.local/lib/bash"
 if [[ -f ""${file_path}"/"${FILE}"" ]]; then
     if [[ ":${PATH}:" != *":${file_path}:"* ]]; then
-        PATH="${PATH}":"$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+        PATH="${file_path}":"${PATH}"
     fi
 fi
 
-file_path=""${HOME}""
-if [[ -f ""${file_path}"/"${FILE}"" ]]; then
-    if [[ ":${PATH}:" != *":${file_path}:"* ]]; then
-        PATH="${PATH}":"${file_path}"
+filePath=""${HOME}"/Desktop"
+if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+        PATH="${filePath}":"${PATH}"
     fi
 fi
 
-file_path=""${HOME}"/Desktop"
-if [[ -f ""${file_path}"/"${FILE}"" ]]; then
-    if [[ ":${PATH}:" != *":${file_path}:"* ]]; then
-        PATH="${PATH}":"${file_path}"
+filePath=""${HOME}""
+if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+        PATH="${filePath}":"${PATH}"
     fi
 fi
 
-file_path=""${HOME}"/another/folder/path/where/the/file/could/be_located"
-if [[ -f ""${file_path}"/"${FILE}"" ]]; then
-    if [[ ":${PATH}:" != *":${file_path}:"* ]]; then
-        PATH="${PATH}":"${file_path}"
+filePath="."
+filePath="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+        PATH="${filePath}":"${PATH}"
     fi
 fi
 
