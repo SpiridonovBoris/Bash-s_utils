@@ -3,7 +3,43 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 26.02.2025 11:40:41
+# Last Modified: 14.02.2025 18:21:58
+
+# Bash utils library
+# For only be evaluated a single time
+# Usage
+# Add library
+#FILE="s_utils.sh"
+#
+#filePath="."
+#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+#        PATH="${PATH}":"$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+#    fi
+#fi
+#
+#filePath=""${HOME}""
+#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+#        PATH="${PATH}":"${filePath}"
+#    fi
+#fi
+#
+#filePath=""${HOME}"/Desktop"
+#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+#        PATH="${PATH}":"${filePath}"
+#    fi
+#fi
+#
+#filePath=""${HOME}"/Job/Ronavi/Projects/H1500/Prog"
+#if [[ -f ""${filePath}"/"${FILE}"" ]]; then
+#    if [[ ":${PATH}:" != *":${filePath}:"* ]]; then
+#        PATH="${PATH}":"${filePath}"
+#    fi
+#fi
+#
+#source "${FILE}" || (echo >&2 -e ""${FILE}" not finde in the \$PATH." && exit 1)
 
 printPelp() {
     cat <<EOF
@@ -95,6 +131,19 @@ die() {
     msg "${msg}"
     exit "${code}"
 }
+
+#die() {
+#    warn "$@"
+#    exit 1
+#}
+#
+#warn() {
+#    catecho "$@" >&2
+#}
+#
+#catecho() {
+#    [ -t 0 ] && echo "$@" || cat -
+#}
 
 parseOptions() {
     # default values of variables set from params
@@ -209,6 +258,14 @@ getDir() {
     fi
         echo "${result}"
 }
+
+#isNotSet() {
+#    local result=1
+#
+#    [[ -z "${@+"set"}" ]] && result=0
+#
+#    return "${result}"
+#}
 
 isProgExists() {
     local result=1
