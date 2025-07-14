@@ -5,7 +5,7 @@
 # Boris Spiridonov
 # Last Modified: 21.04.2025 22:17:09
 
-printPelp() {
+printHelp() {
     cat <<EOF
 Usage: $(basename "${0}") [-h] [-v] [-f] -p param_value arg1 [arg2...]
 
@@ -118,7 +118,7 @@ parseOptions() {
 
     while :; do
         case "${1-}" in
-        -h | --help) printPelp;;
+        -h | --help) printHelp;;
         -v | --verbose) set -x ;;
         --no-color) NO_COLOR=1 ;;
         -f | --flag) flag=1 ;; # example flag
