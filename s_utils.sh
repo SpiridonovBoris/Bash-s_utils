@@ -3,7 +3,7 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 21.04.2025 22:17:09
+# Last Modified: 05.10.2025 00:36:41
 
 printHelp() {
     cat <<EOF
@@ -117,13 +117,13 @@ parseOptions() {
     param=''
 
     while :; do
-        case "${1-}" in
+        case "${1:-}" in
         -h | --help) printHelp;;
         -v | --verbose) set -x ;;
         --no-color) NO_COLOR=1 ;;
         -f | --flag) flag=1 ;; # example flag
         -p | --param) # example named parameter
-          param="${2-}"
+          param="${2:-}"
           shift
           ;;
         -?*) die "Unknown option: "${1}"" ;;
@@ -139,6 +139,102 @@ parseOptions() {
     [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
 
     return 0
+}
+
+# xor: Get bit XOR
+# xor 1234 0x0000 # Return 1234
+# xor 1234 0xFFFF # Return 64301
+xor () {
+    local crc="${1}"
+    local xor="${2:-0xFFFF}"
+
+    echo $(( crc ^ xor ))
+}
+
+# bitReversal: Get bit reversal
+# bitReversal 0x1234 16 # Return
+bitReversal() {
+    local data="${1}"
+    local bits="${2:-8}"
+
+    local result=0
+    local i=0
+
+    for ((i=0; i<"${bits}" ; i++)); do
+        result=$(( (result << 1) | (data & 1) ))
+        data=$(( data >> 1 ))
+    done
+
+    echo $(( result & ((1 << bits) - 1) ))
+}
+
+# getCrc16: Calculate CRC16 checksum for ModBus RTU
+# Poly    Init   RefIn  RefOut  XorOut
+# 0x8005  0xFFFF true   true    0x0000
+# getCrc16 05050001FF00 # Return DC7E
+# getCrc16 05050001FF00 0x8005 # Return DC7E
+getCrc16 () {
+    local data="${1}"
+    local polynomial="${2:-0x8005}"
+
+    local ref_in="${3:-true}"    # true/false
+    local ref_out="${4:-true}"   # true/false
+    local xor_out="${5:-0x0000}" # hex, e.g. 0x0000
+
+    local crc=0xFFFF
+    local byte=0
+    local reversalByte=0
+
+    for (( i=0; i<${#data}; i+=2 )); do
+        byte=$(( 16#${data:i:2} ))
+
+        processedByte=$byte
+        if [[ "${ref_in}" = "true" ]]; then
+            reversalByte=$( bitReversal $byte 8 )
+        fi
+
+        crc=$(( crc ^ ("${reversalByte}" << 8) ))
+
+        for (( j=0; j<8; j++ )); do
+            if (( (crc & 0x8000) )); then
+                crc=$(( ((crc << 1) & 0xFFFF) ^ polynomial ))
+            else
+                crc=$(( (crc << 1) & 0xFFFF ))
+            fi
+        done
+
+    done
+
+    if [[ "${ref_out}" = "true" ]]; then
+        crc=$( bitReversal "$crc" 16 )
+    fi
+
+    crc=$(xor $crc 0x0000)
+
+    # CRC in little-endian format
+    local crc_low=$((crc & 0xFF))
+    local crc_high=$(( (crc >> 8) & 0xFF))
+    printf "%02X%02X" $crc_low $crc_high
+}
+
+# intToBase: An integer number into another representation with another base
+# intToBase 4 2 # Return 001
+intToBase () {
+    local number="${1}"
+    local base="${2}"
+    local result=""
+
+    while [[ "${number}" -ne 0 ]]; do
+        result="${result}""$(( "${number}" % "${base}"))"
+        number="$(( "${number}" / "${base}"))"
+    done
+
+    echo -n "${result}"
+}
+
+# decimalToBinary 4 # Return 001
+decimalToBinary () {
+    intToBase "${@}" 2
 }
 
 decimalToHex() {
@@ -163,8 +259,17 @@ binaryToDecimal() {
 }
 
 hexToDecimal() {
-    #echo "$((0x"${@}"))"
-    printf "%d" 0x"${@}"
+    echo -n $(printf "%d" 0x"${@}")
+}
+
+hexToSignedDecimal() {
+    local max_signed_integer=32767
+    local max_unsigned_integer=65536
+    local result=$(hexToDecimal "${@}")
+
+    [[ $result -gt $max_signed_integer ]] && result=$(( $result - $max_unsigned_integer ))
+
+    echo -n $result
 }
 
 stringToInt () {
@@ -248,7 +353,7 @@ getDir() {
 isNotSet() {
     local result=1
 
-#    [[ -z "${@+"set"}" ]] && result=0
+    #[[ -z "${@+"set"}" ]] && result=0
     [[ -z "${@+set}" ]] && result=0
 
     return "${result}"

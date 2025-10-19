@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # s_utils_lib.sh
-# 16.09.2024 [ru_RU]
+# 15.09.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 14.04.2025 13:15:47
+# Last Modified: 19.10.2025 11:40:31
 
 # Bash utils library
 # For only be evaluated a single time
@@ -42,6 +42,25 @@ if [[ -f ""${filePath}"/"${FILE}"" ]]; then
 fi
 
 source "${FILE}" || (echo >&2 -e ""${FILE}" not finde in the \$PATH." && exit 1)
+
+printHelp() {
+    cat <<EOF
+Usage: $(basename "${0}") [-h]
+
+#pragma once like wrapper for s_utils.sh.
+
+Available options:
+
+-h, --help      Print this help and exit.
+
+Dependency:
+
+s_utils.sh
+
+EOF
+
+    exit 0
+}
 
 bashCheck
 libraryCheck
