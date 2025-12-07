@@ -3,7 +3,9 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 05.10.2025 00:36:41
+# Last Modified: 07.12.2025 19:50:43
+
+S_UTILS_VERSION="0.1.1"
 
 printHelp() {
     cat <<EOF
@@ -270,6 +272,37 @@ hexToSignedDecimal() {
     [[ $result -gt $max_signed_integer ]] && result=$(( $result - $max_unsigned_integer ))
 
     echo -n $result
+}
+
+hexToBinary () {
+    local result=-1
+    local hex="${1}"
+    local bin=""
+
+    for ((i = 0; i < ${#hex}; i++)); do
+        case "${hex:$i:1}" in
+            0)   bin+="0000" ;;
+            1)   bin+="0001" ;;
+            2)   bin+="0010" ;;
+            3)   bin+="0011" ;;
+            4)   bin+="0100" ;;
+            5)   bin+="0101" ;;
+            6)   bin+="0110" ;;
+            7)   bin+="0111" ;;
+            8)   bin+="1000" ;;
+            9)   bin+="1001" ;;
+            A|a) bin+="1010" ;;
+            B|b) bin+="1011" ;;
+            C|c) bin+="1100" ;;
+            D|d) bin+="1101" ;;
+            E|e) bin+="1110" ;;
+            F|f) bin+="1111" ;;
+            *)   bin="Fail"  ;;
+        esac
+    done
+
+    result="${bin}"
+    echo -n "${result}"
 }
 
 stringToInt () {
