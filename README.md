@@ -3,7 +3,7 @@ A collection of syntactic sugar functions for Bash
 
 # Usage
 ## As a interactively
-add in to your ~/.bashrc
+Add the following line to your ~/.bashrc:
 ```bash
 # S_utils
  if [ -f "${HOME}/Path/to/the/s_utils.sh" ]; then
@@ -11,8 +11,8 @@ add in to your ~/.bashrc
  fi
 ```
 
-## As a Linrary
-After the shebang, add at the beginning of your Bash script
+## As a Library
+After the shebang, add the following line at the beginning of your Bash script:
 ```bash
 source s_utils_lib.sh
 ```
