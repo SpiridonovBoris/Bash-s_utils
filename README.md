@@ -12,7 +12,7 @@ add in to your ~/.bashrc
 ```
 
 ## As a Linrary
-After the shebang, add at the beginning of your Bash Script
+After the shebang, add at the beginning of your Bash script
 ```bash
 source s_utils_lib.sh
 ```
