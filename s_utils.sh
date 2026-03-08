@@ -3,7 +3,7 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 07.12.2025 19:50:43
+# Last Modified: 08.03.2026 14:50:20
 
 S_UTILS_VERSION="0.1.1"
 
@@ -89,29 +89,25 @@ setupColors() {
     fi
 }
 
-msg() {
-    echo >&2 -e "${1-}"
-}
-
 die() {
-    local msg="${1}"
+    local text="${1:-""}"
     local code="${2:-1}" # default exit status 1
-    msg "${msg}"
+
+    msg "${text}"
     exit "${code}"
 }
 
-#die() {
-#    warn "$@"
-#    exit 1
-#}
-#
-#warn() {
-#    catecho "$@" >&2
-#}
-#
-#catecho() {
-#    [ -t 0 ] && echo "$@" || cat -
-#}
+msg() {
+    catecho "$@" >&2
+}
+
+catecho() {
+    isTerminal && echo -e "$@" || cat -
+}
+
+isTerminal () {
+    [ -t 0 ]
+}
 
 parseOptions() {
     # default values of variables set from params
@@ -493,11 +489,14 @@ rootCheck() {
     fi
 }
 
+
+
 getUser() {
     local user="$(id -u -n)"
 
     echo "${user}"
 }
+
 
 isBashVersion() {
     local version="${1}"
@@ -510,6 +509,8 @@ isBashVersion() {
     echo "${result}"
 }
 
+# Check bash version
+# bashCheck 4 # Return "Bash 4.0+ required." and exit if Bash version is liwer 4
 bashCheck() {
     local version="${1:-4}"
 
@@ -518,6 +519,8 @@ bashCheck() {
     fi
 }
 
+# Determine whether the current script was called as a library (for example, from another script) or if it was run directly
+# isLibrary # Return 0 if is library # Return -1 if is executable script
 isLibrary() {
     local result=-1
 
@@ -528,12 +531,16 @@ isLibrary() {
     echo "${result}"
 }
 
+# Check if this code is called as a library
+# libraryCheck # Return "Only source this as libraries." and exit if is library
 libraryCheck() {
     (( "$(isLibrary)" == 0 )) || {
     die ""${BASH_SOURCE[0]}" Only source this as libraries."
     }
 }
 
+# Check for multiple inclusions, analogous to #pragma once or #ifndef MY_HEADER_H
+# alreadySeen # Return 0 if called for the first time # Return 1 if called repeatedly
 alreadySeen() {
     local deep=$(("${#BASH_SOURCE[@]}"-1))
     local namespace="${BASH_SOURCE["${deep}"]}"
@@ -584,6 +591,9 @@ chr() {
     printf "\x"$(printf "%x" "${1}")""
 }
 
+# isArray: The binary check of a variable on an array
+# array=[1, 2, 3]
+# isArray array # Return 0
 isArray() {
     local result=1
 
@@ -592,7 +602,8 @@ isArray() {
     return "${result}"
 }
 
-# getArrayIndexes array[@]
+# files=("file1.txt" "file2.txt" "file3.txt")
+# getArrayIndexes array[@] # Return 0 1 2
 getArrayIndexes() {
     declare -a array=("${!1}")
 
@@ -604,8 +615,9 @@ getArrayIndexes() {
     return "${result}"
 }
 
-# getArraySize array[@]
-getArraySize() {
+# files=("file1.txt" "file2.txt" "file3.txt")
+# getArrayLength array[@] # Return 3
+getArrayLength() {
     declare -a array=("${!1:-""}")
 
     local result=0
@@ -616,12 +628,21 @@ getArraySize() {
     return "${result}"
 }
 
-# forEach ls echo
+# files=("file1.txt" "file2.txt" "file3.txt")
+# operation="ls -l"
+# forEach ls echo # Return 1/n1/n1/n
+# forEach $operation files[@]
 forEach() {
-    local each="${1:-1}"
-    local comm="${2:-""}"
+    local operation="${1:-echo}"
+    local array="${2:-""}"
 
-    for i in "${each}"; do
-        "$(comm "${i}")"
+    if [[ -v "${array}" ]]; then
+        array=("${!array}")
+    else
+        array=("${@}")
+    fi
+
+    for item in "${array[@]:0}"; do
+        $operation "$item"
     done
 }
