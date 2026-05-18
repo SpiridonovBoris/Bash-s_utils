@@ -3,47 +3,14 @@
 # s_utils.sh
 # 06.01.2024 [ru_RU]
 # Boris Spiridonov
-# Last Modified: 08.03.2026 14:50:20
+# Last Modified: 19.05.2026 00:40:00
 
 S_UTILS_VERSION="0.1.1"
 
-printHelp() {
-    cat <<EOF
-Usage: $(basename "${0}") [-h] [-v] [-f] -p param_value arg1 [arg2...]
-
-Script description here.
-
-The arg1 is a required argument.
-The arg2 is a optional argument.
-
-Available options:
-
--h, --help      Print this help and exit.
--v, --verbose   Print script debug info.
--f, --flag      Some flag description.
--p, --param     Some param description,
-                param_value description.
--a              Output all objects.
--c              Make a count.
--d              Specify directory.
--e              Expand object.
--f              Specify the file from which to read data.
--i              Ignore character case.
--l              Make full-format data output.
--n              Use non-interactive (batch) mode.
--o              Specify a file to which to redirect output.
--q              Execute a script in quiet mode.
--r              Process folders and files recursively.
--s              Execute a script in silent mode.
--v              Execute verbose output.
--x              Exclude an object.
--y              Answer ‘yes’ to all questions.
---list-only     Display the output of the progamma as if it were being executed, but not actually doing anything.
-
-Dependency:
-
-EOF
-    exit 0
+cleanup() {
+    trap - SIGINT SIGTERM ERR EXIT
+    # script cleanup here
+    rm -f "${RESPONSE_PIPE}"
 }
 
 init() {
@@ -59,12 +26,6 @@ init() {
     readonly NEW_LINE="\n"
 
     readonly RESPONSE_PIPE=""${HOME}"/response_pipe"
-}
-
-cleanup() {
-    trap - SIGINT SIGTERM ERR EXIT
-    # script cleanup here
-    rm -f "${RESPONSE_PIPE}"
 }
 
 setupColors() {
@@ -89,54 +50,24 @@ setupColors() {
     fi
 }
 
-die() {
-    local text="${1:-""}"
-    local code="${2:-1}" # default exit status 1
-
-    msg "${text}"
-    exit "${code}"
-}
-
-msg() {
-    catecho "$@" >&2
+isTerminal () {
+    [ -t 0 ]
 }
 
 catecho() {
     isTerminal && echo -e "$@" || cat -
 }
 
-isTerminal () {
-    [ -t 0 ]
+msg() {
+    catecho "$@" >&2
 }
 
-parseOptions() {
-    # default values of variables set from params
-    flag=0
-    param=''
+die() {
+    local text="${1:-""}"
+    local code="${2:-1}" # default exit status 1
 
-    while :; do
-        case "${1:-}" in
-        -h | --help) printHelp;;
-        -v | --verbose) set -x ;;
-        --no-color) NO_COLOR=1 ;;
-        -f | --flag) flag=1 ;; # example flag
-        -p | --param) # example named parameter
-          param="${2:-}"
-          shift
-          ;;
-        -?*) die "Unknown option: "${1}"" ;;
-        *) break ;;
-        esac
-        shift
-    done
-
-    args=("${@}")
-
-    # check required params and arguments
-    [[ -z "${param-}" ]] && die "Missing required parameter: param"
-    [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
-
-    return 0
+    msg "${text}"
+    exit "${code}"
 }
 
 # xor: Get bit XOR
@@ -400,6 +331,16 @@ isSet() {
     return "${result}"
 }
 
+# isLinux: test shell is linux or not
+# isLinux # Return 0
+isLinux() {
+    local result=-1
+
+    [[ "$(uname)" =~ Linux ]] && result=0
+
+    return "${result}"
+}
+
 isProgExists() {
     local result=1
 
@@ -488,8 +429,6 @@ rootCheck() {
         die "This script must start at root or use sudo."
     fi
 }
-
-
 
 getUser() {
     local user="$(id -u -n)"
