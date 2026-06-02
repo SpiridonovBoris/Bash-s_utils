@@ -5,20 +5,20 @@ A collection of syntactic sugar functions for Bash
 ## As a interactively
 Add the following line to your ~/.bashrc:
 ```bash
-# S_utils
- if [ -f "${HOME}/Path/to/the/s_utils.sh" ]; then
-   source "${HOME}/Path/to/the/s_utils.sh"
+# sUtils
+ if [ -f "${HOME}/Path/to/the/sUtils.sh" ]; then
+   source "${HOME}/Path/to/the/sUtils.sh"
  fi
 ```
 
 ## As a Library
 After the shebang, add the following line at the beginning of your Bash script:
 ```bash
-source s_utils_lib.sh
+source sUtilsLib.sh
 ```
 or
 ```bash
-FILE="s_utils.sh"
+FILE="sUtils.sh"
 
 file_path=""${HOME}"/.local/lib/bash"
 if [[ -f ""${file_path}"/"${FILE}"" ]]; then
