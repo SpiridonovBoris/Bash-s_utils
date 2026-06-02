@@ -1,4 +1,4 @@
-# Bash-s_utils
+# Bash-sUtils
 A collection of syntactic sugar functions for Bash
 
 # Usage
